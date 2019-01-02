@@ -9,8 +9,10 @@ use crate::ast::*;
 use crate::eval::eval_step;
 
 fn main() {
-    // Using the helper macros, build a small example (NOT FALSE).
-    let mut ex = app!(not!(), f!());
+    // Using the helper macros, build a small example "not not false".
+    let mut ex = app!(var!("not"), app!(var!("not"), var!("false")));
+
+    let eval_context = eval::EvalContext { should_expand: true, symbol_table: prelude!() };
 
     // Print out each step of evaluation until the user quits (with "q").
     loop {
@@ -28,6 +30,6 @@ fn main() {
         }
 
         // Step forward in evaluation.
-        ex = eval_step(ex);
+        ex = eval_step(ex, &eval_context);
     }
 }

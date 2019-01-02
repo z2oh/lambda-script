@@ -1,3 +1,12 @@
+/// Utility macro for quickly constructing a symbol table containing simple prelude definitions.
+macro_rules! prelude {
+    () => (vec![("true".to_string(), t!()),
+                ("false".to_string(), f!()),
+                ("not".to_string(), not!()),
+                ("if".to_string(), if_!())].into_iter()
+                                           .collect())
+}
+
 /// Utility macro for quickly constructing an application λ-term.
 macro_rules! app {
     ($e1:expr, $e2:expr) => (LambdaTerm::Application(Box::new(Application { term1: $e1, term2: $e2, })))
@@ -69,12 +78,12 @@ macro_rules! not {
             app!(
                 app!(
                     app!(
-                        if_!(),
+                        var!("if"),
                         var!("b")
                     ),
-                    f!()
+                    var!("false")
                 ),
-                t!()
+                var!("true")
             )
         )
     )

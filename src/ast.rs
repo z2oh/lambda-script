@@ -40,7 +40,7 @@ pub struct Application {
 
 impl fmt::Display for Application {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({} {})", self.term1, self.term2)
+        write!(f, "{} {}", self.term1, self.term2)
     }
 }
 

@@ -1,16 +1,36 @@
+use std::collections::HashMap;
+
 use crate::ast::*;
 
-/// Moves evaluation forward by a single step, which currently just invokes application.
-/// TODO: Add expansion step to allow for free variables to expand based on a symbol table lookup.
-pub fn eval_step(term: LambdaTerm) -> LambdaTerm {
-    if let LambdaTerm::Application(app_ref) = term {
-        eval_application(Application {
-            term1: eval_step(app_ref.term1),
-            term2: eval_step(app_ref.term2),
-        })
-    }
-    else {
-        term
+pub struct EvalContext {
+    pub should_expand: bool,
+    /// The symbol table contains function definitions. Free variables are looked up in this
+    /// table for replacement if no more evaluation can be performed. We call this process
+    /// "expansion".
+    pub symbol_table: HashMap<String, LambdaTerm>,
+}
+
+/// Moves evaluation forward by a single step.
+pub fn eval_step(term: LambdaTerm, context: &EvalContext) -> LambdaTerm {
+    match term {
+        // Perform the application.
+        LambdaTerm::Application(app_ref) => eval_application(Application {
+                                                // We recurse only on the left side of an
+                                                // application.
+                                                term1: eval_step(app_ref.term1, context),
+                                                term2: app_ref.term2,
+                                            }),
+        // Expand a free variable.
+        // TODO: Test that bound variables are not expanded.
+        LambdaTerm::Variable(ref var_ref) if context.should_expand &&
+                                            context
+                                            .symbol_table
+                                            .contains_key(&var_ref.id) => context
+                                                                         .symbol_table
+                                                                         .get(&var_ref.id)
+                                                                         .unwrap()
+                                                                         .clone(),
+        term => term,
     }
 }
 
