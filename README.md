@@ -2,7 +2,7 @@
 λ-script is an implementation of the [λ-calculus](https://en.wikipedia.org/wiki/Lambda_calculus) in Rust. This project is still in its very early stages. Running the program will present a simple evaluation loop that evaluates the expression `not not false` which, when expanded, is the λ-term:
 
 ```
-λb.λb.λt.λf.b t f b λx.λy.y λx.λy.x λb.λb.λt.λf.b t f b λx.λy.y λx.λy.x λx.λy.y
+(λb.(λb.λt.λf.b t f) b λx.λy.y λx.λy.x) (λb.(λb.λt.λf.b t f) b λx.λy.y λx.λy.x) λx.λy.y
 ```
 
 After evaluation is complete, the λ-term `λx.λy.y` remains, which is the expanded form of `false`.
