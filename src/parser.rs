@@ -1,6 +1,36 @@
 use crate::ast::{Abstraction, Application, LambdaTerm, Variable};
 use nom::*;
 use nom::types::CompleteStr;
+use std::collections::HashMap;
+
+pub struct Program {
+    pub declarations: HashMap<Variable, LambdaTerm>,
+    pub evaluation_term: LambdaTerm,
+}
+
+named!(_parse_program<CompleteStr, Program>,
+    do_parse!(
+        declarations: parse_declarations >>
+        evaluation_term: lambda_term >>
+        (Program {
+            declarations,
+            evaluation_term,
+        })
+    )
+);
+
+named!(parse_declarations<CompleteStr, HashMap<Variable, LambdaTerm>>,
+    map!(many0!(
+            ws!(do_parse!(
+                var: variable >>
+                tag!("=") >>
+                term: lambda_term >>
+                ((var, term))
+            ))
+        ),
+        |v| v.into_iter().collect()
+    )
+);
 
 named!(lambda_term<CompleteStr, LambdaTerm>,
     call!(application_term)
@@ -51,6 +81,16 @@ named!(variable_term<CompleteStr, LambdaTerm>,
 );
 
 // TODO: Return Error instead of Option.
+pub fn parse_program(input: &str) -> Option<Program> {
+    let input = CompleteStr(input);
+    match _parse_program(input) {
+        Ok((rem, program)) => if rem.len() > 0 { None } else { Some(program) },
+        _ => None,
+    }
+}
+
+// TODO: Return Error instead of Option.
+#[allow(dead_code)]
 pub fn parse(input: &str) -> Option<LambdaTerm> {
     let input = CompleteStr(input);
     match lambda_term(input) {

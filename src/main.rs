@@ -8,19 +8,26 @@ mod ast;
 mod eval;
 mod parser;
 
-use crate::ast::*;
 use crate::eval::eval_step;
-use crate::parser::parse;
+use crate::parser::parse_program;
 
 fn main() {
-    let mut ex = parse("not not true").unwrap();
+    let ex = parse_program("true  = λx.λy.x
+                            false = λx.λy.y
 
-    let eval_context = eval::EvalContext { should_expand: true, symbol_table: prelude!() };
+                            if = λb.λt.λf.b t f
+                            not = if false true
+
+                            not not true").unwrap();
+
+    let mut term = ex.evaluation_term;
+
+    let eval_context = eval::EvalContext { should_expand: true, symbol_table: ex.declarations };
 
     // Print out each step of evaluation until the user quits (with "q").
     loop {
         // Print out the current value.
-        print!("{}", ex);
+        print!("{}", term);
         stdout().flush().unwrap();
 
         // Read in input.
@@ -33,6 +40,6 @@ fn main() {
         }
 
         // Step forward in evaluation.
-        ex = eval_step(ex, &eval_context);
+        term = eval_step(term, &eval_context);
     }
 }

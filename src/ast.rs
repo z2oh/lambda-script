@@ -28,9 +28,10 @@ impl fmt::Debug for LambdaTerm {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 /// A variable defines a bound or free variable in an abstraction. Bound variables are replaced
-/// during application.
+/// during application. NOTE: `Variable` derives `Hash`, as it is used as the key for symbol table
+/// entries.
 pub struct Variable {
     pub id: String,
 }

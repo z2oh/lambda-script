@@ -7,7 +7,7 @@ pub struct EvalContext {
     /// The symbol table contains function definitions. Free variables are looked up in this
     /// table for replacement if no more evaluation can be performed. We call this process
     /// "expansion".
-    pub symbol_table: HashMap<String, LambdaTerm>,
+    pub symbol_table: HashMap<Variable, LambdaTerm>,
 }
 
 /// Moves evaluation forward by a single step.
@@ -20,11 +20,11 @@ pub fn eval_step(term: LambdaTerm, context: &EvalContext) -> LambdaTerm {
         LambdaTerm::Variable(ref var_ref) if context.should_expand &&
                                             context
                                             .symbol_table
-                                            .contains_key(&var_ref.id) => context
-                                                                         .symbol_table
-                                                                         .get(&var_ref.id)
-                                                                         .unwrap()
-                                                                         .clone(),
+                                            .contains_key(var_ref) => context
+                                                                      .symbol_table
+                                                                      .get(var_ref)
+                                                                      .unwrap()
+                                                                      .clone(),
         term => term,
     }
 }
@@ -44,9 +44,9 @@ fn eval_application(Application { term1, term2 }: Application, context: &EvalCon
         LambdaTerm::Variable(ref var_ref) if context.should_expand &&
                                             context
                                             .symbol_table
-                                            .contains_key(&var_ref.id) => LambdaTerm::Application(Box::new(Application {
+                                            .contains_key(var_ref) => LambdaTerm::Application(Box::new(Application {
                                                 term1: context.symbol_table
-                                                              .get(&var_ref.id)
+                                                              .get(var_ref)
                                                               .unwrap()
                                                               .clone(),
                                                 term2,
