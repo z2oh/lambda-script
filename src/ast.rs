@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq)]
 #[allow(dead_code)]
 pub enum LambdaTerm {
     Variable(Box<Variable>),
@@ -28,7 +28,7 @@ impl fmt::Debug for LambdaTerm {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 /// A variable defines a bound or free variable in an abstraction. Bound variables are replaced
 /// during application.
 pub struct Variable {
@@ -41,7 +41,7 @@ impl fmt::Display for Variable {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 /// An application is any term applied to any other term.
 pub struct Application {
     pub term1: LambdaTerm,
@@ -59,7 +59,7 @@ impl fmt::Display for Application {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 /// Abstractions contain a single bound variable and a body. They take the form of `λbound.body`.
 /// When an abstraction is on the left side of an application, the right side of the application is
 /// put in the place of each instance of the bound variable in the abstraction body. The replaced

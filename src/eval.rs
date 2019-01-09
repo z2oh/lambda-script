@@ -14,12 +14,7 @@ pub struct EvalContext {
 pub fn eval_step(term: LambdaTerm, context: &EvalContext) -> LambdaTerm {
     match term {
         // Perform the application.
-        LambdaTerm::Application(app_ref) => eval_application(Application {
-                                                // We recurse only on the left side of an
-                                                // application.
-                                                term1: eval_step(app_ref.term1, context),
-                                                term2: app_ref.term2,
-                                            }),
+        LambdaTerm::Application(app_ref) => eval_application(*app_ref, context),
         // Expand a free variable.
         // TODO: Test that bound variables are not expanded.
         LambdaTerm::Variable(ref var_ref) if context.should_expand &&
@@ -37,9 +32,25 @@ pub fn eval_step(term: LambdaTerm, context: &EvalContext) -> LambdaTerm {
 /// If the first term is an abstraction, then the application is performed by replacing the bound
 /// variable with the second term. If the first term is not an abstraction, then the original
 /// application is returned.
-fn eval_application(Application { term1, term2 }: Application) -> LambdaTerm {
+fn eval_application(Application { term1, term2 }: Application, context: &EvalContext) -> LambdaTerm {
     match term1 {
+        LambdaTerm::Application(app_ref) => LambdaTerm::Application(Box::new(Application {
+            term1: eval_application(*app_ref, context),
+            term2,
+        })),
         LambdaTerm::Abstraction(ab_ref) => replace_bound(ab_ref.body, &ab_ref.bound, &term2),
+        // Expand a free variable.
+        // TODO: Test that bound variables are not expanded.
+        LambdaTerm::Variable(ref var_ref) if context.should_expand &&
+                                            context
+                                            .symbol_table
+                                            .contains_key(&var_ref.id) => LambdaTerm::Application(Box::new(Application {
+                                                term1: context.symbol_table
+                                                              .get(&var_ref.id)
+                                                              .unwrap()
+                                                              .clone(),
+                                                term2,
+                                            })),
         _ => LambdaTerm::Application(Box::new(Application {
             term1,
             term2,

@@ -1,16 +1,19 @@
+extern crate nom;
+
 use std::io::{stdin, stdout, Write};
 
 #[macro_use]
 mod util;
 mod ast;
 mod eval;
+mod parser;
 
 use crate::ast::*;
 use crate::eval::eval_step;
+use crate::parser::parse;
 
 fn main() {
-    // Using the helper macros, build a small example "not not false".
-    let mut ex = app!(var!("not"), app!(var!("not"), var!("false")));
+    let mut ex = parse("not not true").unwrap();
 
     let eval_context = eval::EvalContext { should_expand: true, symbol_table: prelude!() };
 

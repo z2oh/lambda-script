@@ -52,14 +52,14 @@ macro_rules! f {
 macro_rules! if_ {
     () => (
         ab!(
-            "b1",
+            "b",
             ab!(
                 "t",
                 ab!(
                     "f",
                     app!(
                         app!(
-                            var!("b1"),
+                            var!("b"),
                             var!("t")
                         ),
                         var!("f")
@@ -70,7 +70,7 @@ macro_rules! if_ {
     )
 }
 
-/// The "not" λ-term.
+/// The "not" λ-term defined in terms of existing λ-terms (w/ substitution).
 macro_rules! not {
     () => (
         ab!(
@@ -84,6 +84,26 @@ macro_rules! not {
                     var!("false")
                 ),
                 var!("true")
+            )
+        )
+    )
+}
+
+/// The "not" λ-term.
+#[allow(unused_macros)]
+macro_rules! not_full {
+    () => (
+        ab!(
+            "b",
+            app!(
+                app!(
+                    app!(
+                        if_!(),
+                        var!("b")
+                    ),
+                    f!()
+                ),
+                t!()
             )
         )
     )
