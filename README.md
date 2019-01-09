@@ -1,11 +1,37 @@
 # λ-script
-λ-script is an implementation of the [λ-calculus](https://en.wikipedia.org/wiki/Lambda_calculus) in Rust. This project is still in its very early stages. Running the program will present a simple evaluation loop that evaluates the expression `not not false` which, when expanded, is the λ-term:
+λ-script is an implementation of the [λ-calculus](https://en.wikipedia.org/wiki/Lambda_calculus) in Rust. This project is still in its very early stages. Running the program will invoke a small demo which parses the following input:
 
 ```
-(λb.(λb.λt.λf.b t f) b λx.λy.y λx.λy.x) (λb.(λb.λt.λf.b t f) b λx.λy.y λx.λy.x) λx.λy.y
+true  = λx.λy.x
+false = λx.λy.y
+
+if = λb.λt.λf.b t f
+not = if false true
+
+not not true
 ```
 
-After evaluation is complete, the λ-term `λx.λy.y` remains, which is the expanded form of `false`.
+and begins evaluating `not not true`. The evaluation advances by one operation every time stdin advances a line. The eventual output looks like the following:
+
+```
+not not true
+if false true not true
+(λb.λt.λf.b t f) false true not true
+(λt.λf.false t f) true not true
+(λf.false true f) not true
+false true not true
+(λx.λy.y) true not true
+(λy.y) not true
+not true
+if false true true
+(λb.λt.λf.b t f) false true true
+(λt.λf.false t f) true true
+(λf.false true f) true
+false true true
+(λx.λy.y) true true
+(λy.y) true
+true
+```
 
 ##### _N.B._, the "λ" symbol
 
