@@ -51,10 +51,14 @@ pub struct Application {
 
 impl fmt::Display for Application {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self.term1 {
+        match (&self.term1, &self.term2) {
             // If the first term is an abstraction, we must wrap it in parentheses to disambiguate
-            // the second term from a continuation of the abstraction body.
-            LambdaTerm::Abstraction(..) => write!(f, "({}) {}", self.term1, self.term2),
+            // the second term from a continuation of the abstraction body. If the second term is
+            // an application, we must wrap it in parentheses as application is normally
+            // left-associative.
+            (LambdaTerm::Abstraction(..), LambdaTerm::Application(..)) => write!(f, "({}) ({})", self.term1, self.term2),
+            (LambdaTerm::Abstraction(..), _) => write!(f, "({}) {}", self.term1, self.term2),
+            (_, LambdaTerm::Application(..)) => write!(f, "{} ({})", self.term1, self.term2),
             _ => write!(f, "{} {}", self.term1, self.term2),
         }
     }

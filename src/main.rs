@@ -18,7 +18,13 @@ fn main() {
                             if = λb.λt.λf.b t f
                             not = if false true
 
-                            not not true").unwrap();
+                            0 = λf.λy.x
+                            succ = λn.λf.λx.f (n f x)
+
+                            1 = succ 0
+                            2 = succ 1
+
+                            succ 2").unwrap();
 
     let mut term = ex.evaluation_term;
 

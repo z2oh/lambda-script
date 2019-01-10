@@ -70,7 +70,7 @@ named!(abstraction_term<CompleteStr, LambdaTerm>,
 );
 
 named!(variable<CompleteStr, Variable>,
-    map!(call!(alpha), |id| Variable { id: id.to_string(), } )
+    map!(is_not!("\t\n λ.=()"), |id| Variable { id: id.to_string(), } )
 );
 
 named!(variable_term<CompleteStr, LambdaTerm>,

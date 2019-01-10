@@ -15,6 +15,11 @@ pub fn eval_step(term: LambdaTerm, context: &EvalContext) -> LambdaTerm {
     match term {
         // Perform the application.
         LambdaTerm::Application(app_ref) => eval_application(*app_ref, context),
+        // If all we have left is an abstraction, we attempt to simplify its body.
+        LambdaTerm::Abstraction(ab_ref) => LambdaTerm::Abstraction(Box::new(Abstraction {
+                bound: ab_ref.bound,
+                body: eval_step(ab_ref.body, context),
+        })),
         // Expand a free variable.
         // TODO: Test that bound variables are not expanded.
         LambdaTerm::Variable(ref var_ref) if context.should_expand &&
@@ -25,6 +30,7 @@ pub fn eval_step(term: LambdaTerm, context: &EvalContext) -> LambdaTerm {
                                                                       .get(var_ref)
                                                                       .unwrap()
                                                                       .clone(),
+        // We cannot simplify this term anymore.
         term => term,
     }
 }
@@ -51,9 +57,10 @@ fn eval_application(Application { term1, term2 }: Application, context: &EvalCon
                                                               .clone(),
                                                 term2,
                                             })),
+        // If we cannot recurse to the left anymore, we attempt to recurse on the right.
         _ => LambdaTerm::Application(Box::new(Application {
             term1,
-            term2,
+            term2: eval_step(term2, context),
         })),
     }
 }
