@@ -2,36 +2,59 @@
 λ-script is an implementation of the [λ-calculus](https://en.wikipedia.org/wiki/Lambda_calculus) in Rust. This project is still in its very early stages. Running the program will invoke a small demo which parses the following input:
 
 ```
-true  = λx.λy.x
-false = λx.λy.y
+0 = λf.λx.x
+succ = λn.λf.λx.f (n f x)
 
-if = λb.λt.λf.b t f
-not = if false true
+1 = succ 0
+2 = succ 1
 
-not not true
+add = λm.λn.m succ n
+
+add 2 2
 ```
 
-and begins evaluating `not not true`. The evaluation advances by one operation every time stdin advances a line. The eventual output looks like the following:
+and begins evaluating `add 2 2`. The evaluation advances by one operation every time stdin advances a line. The eventual output looks like the following:
 
 ```
-not not true
-if false true not true
-(λb.λt.λf.b t f) false true not true
-(λt.λf.false t f) true not true
-(λf.false true f) not true
-false true not true
-(λx.λy.y) true not true
-(λy.y) not true
-not true
-if false true true
-(λb.λt.λf.b t f) false true true
-(λt.λf.false t f) true true
-(λf.false true f) true
-false true true
-(λx.λy.y) true true
-(λy.y) true
-true
+add 2 2
+(λm.λn.m succ n) 2 2
+(λn.2 succ n) 2
+2 succ 2
+succ 1 succ 2
+(λn.λf.λx.f (n f x)) 1 succ 2
+(λf.λx.f (1 f x)) succ 2
+(λx.succ (1 succ x)) 2
+succ (1 succ 2)
+(λn.λf.λx.f (n f x)) (1 succ 2)
+λf.λx.f (1 succ 2 f x)
+λf.λx.f (succ 0 succ 2 f x)
+λf.λx.f ((λn.λf.λx.f (n f x)) 0 succ 2 f x)
+λf.λx.f ((λf.λx.f (0 f x)) succ 2 f x)
+λf.λx.f ((λx.succ (0 succ x)) 2 f x)
+λf.λx.f (succ (0 succ 2) f x)
+λf.λx.f ((λn.λf.λx.f (n f x)) (0 succ 2) f x)
+λf.λx.f ((λf.λx.f (0 succ 2 f x)) f x)
+λf.λx.f ((λx.f (0 succ 2 f x)) x)
+λf.λx.f (f (0 succ 2 f x))
+λf.λx.f (f ((λf.λx.x) succ 2 f x))
+λf.λx.f (f ((λx.x) 2 f x))
+λf.λx.f (f (2 f x))
+λf.λx.f (f (succ 1 f x))
+λf.λx.f (f ((λn.λf.λx.f (n f x)) 1 f x))
+λf.λx.f (f ((λf.λx.f (1 f x)) f x))
+λf.λx.f (f ((λx.f (1 f x)) x))
+λf.λx.f (f (f (1 f x)))
+λf.λx.f (f (f (succ 0 f x)))
+λf.λx.f (f (f ((λn.λf.λx.f (n f x)) 0 f x)))
+λf.λx.f (f (f ((λf.λx.f (0 f x)) f x)))
+λf.λx.f (f (f ((λx.f (0 f x)) x)))
+λf.λx.f (f (f (f (0 f x))))
+λf.λx.f (f (f (f ((λf.λx.x) f x))))
+λf.λx.f (f (f (f ((λx.x) x))))
+λf.λx.f (f (f (f x)))
 ```
+
+The final result, `λf.λx.f (f (f (f x)))` is the Church numeral 4.
 
 ##### _N.B._, the "λ" symbol
 
