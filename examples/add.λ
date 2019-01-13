@@ -1,0 +1,9 @@
+0 = λf.λx.x
+succ = λn.λf.λx.f (n f x)
+
+1 = succ 0
+2 = succ 1
+
+add = λm.λn.m succ n
+
+add 2 2

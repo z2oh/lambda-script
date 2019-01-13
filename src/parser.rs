@@ -1,20 +1,54 @@
 use crate::ast::{Abstraction, Application, LambdaTerm, Variable};
-use nom::*;
 use nom::types::CompleteStr;
+use nom::*;
 use std::collections::HashMap;
+use std::fmt;
+use std::error::Error;
 
-pub struct Program {
-    pub declarations: HashMap<Variable, LambdaTerm>,
-    pub evaluation_term: LambdaTerm,
+pub enum Script {
+    Library {
+        declarations: HashMap<Variable, LambdaTerm>,
+    },
+    Program {
+        declarations: HashMap<Variable, LambdaTerm>,
+        evaluation_term: LambdaTerm,
+    },
 }
 
-named!(_parse_program<CompleteStr, Program>,
+#[derive(Debug)]
+pub enum ParseError {
+    RemainingInput(String),
+    InvalidInput,
+}
+
+impl Error for ParseError {}
+
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ParseError::RemainingInput(rem) => {
+                write!(f, "Finished parsing, but experienced more input:\n```\n{})\n```", rem)
+            },
+            ParseError::InvalidInput => {
+                write!(f, "The input was invalid!")
+            }
+        }
+    }
+}
+
+named!(_parse_script<CompleteStr, Script>,
     do_parse!(
         declarations: parse_declarations >>
-        evaluation_term: lambda_term >>
-        (Program {
-            declarations,
-            evaluation_term,
+        evaluation_term: opt!(lambda_term) >>
+        ws!(eof!()) >>
+        (match evaluation_term {
+            Some(evaluation_term) => Script::Program {
+                declarations,
+                evaluation_term,
+            },
+            None => Script::Library {
+                declarations,
+            },
         })
     )
 );
@@ -80,22 +114,32 @@ named!(variable_term<CompleteStr, LambdaTerm>,
     )
 );
 
-// TODO: Return Error instead of Option.
-pub fn parse_program(input: &str) -> Option<Program> {
+pub fn parse_script(input: &str) -> Result<Script, ParseError> {
     let input = CompleteStr(input);
-    match _parse_program(input) {
-        Ok((rem, program)) => if rem.len() > 0 { None } else { Some(program) },
-        _ => None,
+    match _parse_script(input) {
+        Ok((rem, script)) => {
+            if rem.len() > 0 {
+                Err(ParseError::RemainingInput(rem.to_string()))
+            } else {
+                Ok(script)
+            }
+        }
+        Err(_) => Err(ParseError::InvalidInput),
     }
 }
 
-// TODO: Return Error instead of Option.
 #[allow(dead_code)]
-pub fn parse(input: &str) -> Option<LambdaTerm> {
+pub fn parse(input: &str) -> Result<LambdaTerm, ParseError> {
     let input = CompleteStr(input);
     match lambda_term(input) {
-        Ok((rem, term)) => if rem.len() > 0 { None } else { Some(term) },
-        _ => None,
+        Ok((rem, term)) => {
+            if rem.len() > 0 {
+                Err(ParseError::RemainingInput(rem.to_string()))
+            } else {
+                Ok(term)
+            }
+        }
+        Err(_) => Err(ParseError::InvalidInput),
     }
 }
 

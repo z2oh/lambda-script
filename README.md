@@ -1,5 +1,7 @@
 # λ-script
-λ-script is an implementation of the [λ-calculus](https://en.wikipedia.org/wiki/Lambda_calculus) in Rust. This project is still in its very early stages. Running the program will invoke a small demo which parses the following input:
+λ-script is an implementation of the [λ-calculus](https://en.wikipedia.org/wiki/Lambda_calculus) in Rust. This project is still in its very early stages. Running the compiled binary will attempt to execute `./examples/add.λ`, so be sure to invoke `cargo run` from the project root.
+
+`./examples/add.λ` looks like this:
 
 ```
 0 = λf.λx.x
@@ -13,7 +15,7 @@ add = λm.λn.m succ n
 add 2 2
 ```
 
-and begins evaluating `add 2 2`. The evaluation advances by one operation every time stdin advances a line. The eventual output looks like the following:
+After the input file is parsed, the program begins evaluating `add 2 2`. The evaluation advances by one operation every time stdin advances a line. The eventual output looks like the following:
 
 ```
 add 2 2

@@ -1,0 +1,9 @@
+0 = λf.λx.x
+succ = λn.λf.λx.f (n f x)
+add = λm.λn.m succ n
+
+true  = λx.λy.x
+false = λx.λy.y
+
+if = λb.λt.λf.b t f
+not = if false true
